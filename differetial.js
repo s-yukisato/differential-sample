@@ -26,20 +26,19 @@ function parabola() {
 
     for (j = 1; j <= 200; j++) {
         if ((j % 10) == 0) {
-            console.log((j * k).toFixed(5))
-            for (i = 0; i < n; i += 2) {
-                console.log((u[i]).toFixed(5))
+            console.log((j * k).toFixed(3))
+            for (i = 0; i <= n; i += 2) {
+                console.log((u[i]).toFixed(3))
             }
             console.log("\n")
         }
         for (i = 1; i < n; i++) {
             w[i] = r * (u[i + 1] + u[i - 1]) + s * u[i]
         }
-        for (i = 1; i < n; i++) {
+        for (i = 0; i <= n; i++) {
             u[i] = w[i]
         }
     }
-
 }
 
 function hyperbolic() {
@@ -73,7 +72,7 @@ function hyperbolic() {
     for (j = 0; j <= 200; j++) {
         if ((j % 10) == 0) {
             console.log((j * k).toFixed(3))
-            for (i = 0; i < n; i += 2) {
+            for (i = 0; i <= n; i += 2) {
                 console.log((u[i]).toFixed(3))
             }
             console.log("\n")
