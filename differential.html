@@ -13,7 +13,7 @@
 <body>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <div id="chart_div"></div>
-    <button id="b1">change</button>
+    <button id="next">NEXT</button>
     <button id="start">START</button>
     <button id="stop">STOP</button>
     <script>
@@ -80,8 +80,6 @@
             let count = 0
 
             for (let k in rows) {
-                console.log(k)
-                console.log(rows[k])
                 data[count] = new google.visualization.DataTable();
                 data[count].addColumn('number', 'X');
                 data[count].addColumn('number', 'Y');
@@ -103,13 +101,13 @@
                     title: 'Amplitude',
                     minValue: -0.5,
                     maxValue: 0.5,
-                    ticks: [-0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4]
-                }
+                    ticks: [-0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
+                },
             };
 
             var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
 
-            var button = document.getElementById('b1');
+            var button = document.getElementById('next');
             function drawChart() {
                 // Disabling the button while the chart is drawing.
                 button.disabled = true;
@@ -120,36 +118,41 @@
                 chart.draw(data[current], options);
             }
 
-            drawChart();
-
             function update() {
-                if(current == 199){
+                if (current == 199) {
                     current = 0
                 }
                 current = current + 1
                 drawChart()
             }
 
-
             button.onclick = function () {
                 deleteInterval()
                 update()
             }
 
-            const intervalId = setInterval(update, 100);
+            let intervalId = setInterval(update, 100);
 
             const startButton = document.getElementById('start');
             const stopButton = document.getElementById('stop');
 
-            // startButton.onclick = function () {
-            //     const intervalId = setInterval(update, 100);
-            // }
+            startButton.onclick = function () {
+                startInterval()
+            }
+            function startInterval() {
+                if (intervalId == null) {
+                    intervalId = setInterval(update, 100);
+                }
+            }
 
             stopButton.onclick = function () {
                 deleteInterval()
             }
             function deleteInterval() {
-                clearInterval(intervalId)
+                if (intervalId != null) {
+                    clearInterval(intervalId)
+                    intervalId = null
+                }
             }
         }
     </script>
