@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./libs/style.css">
+    <script src="./libs/main.js"></script>
+    <title>双曲型偏微分方程式シミュレータ</title>
+</head>
+
+<body>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <div class="bg-light text-center">
+        <h1>双曲型偏微分方程式のシミュレータ</h1>
+    </div>
+    <div>
+        <p>双曲型偏微分方程式とは<br>二階線形微分方程式のac-b^2 &lt; 0を満たすとき双曲型偏微分方程式という。</p>
+        <p>双曲型偏微分方程式の代表としては、波動方程式が有名だろう。<br></p>
+        <p>二階微分方程式ということは、現在の状態とその前の状態を使用して、次の状態を求める。
+        </p>
+    </div>
+    <div class="container-fluid">
+        <div class="center-block">
+            <div id="chart_div" class=""></div>
+            <input type="text" id="peak">
+            <div class="btn-group">
+                <button id="back" class="btn btn-outline-secondary">BACK</button>
+                <button id="next" class="btn btn-outline-info">NEXT</button>
+                <button id="start" class="btn btn-outline-primary">START</button>
+                <button id="stop" class="btn btn-outline-danger">STOP</button>
+            </div>
+        </div>
+    </div>
+    <div>
+        <p class="alert alert-dark">Now<span id="count"></span></p>
+    </div>
+    <script>
+
+        function hyperbolic() {
+            const n = 200
+            const u = [n + 1];
+            const v = [n + 1];
+            const w = [n + 1];
+            const k = 0.001
+            let h, r, s, q;
+            let i, j;
+
+            // 定数
+            h = 1.0 / n
+            r = k / h
+            q = r * r
+            s = 2.0 * (1.0 - q)
+            let peak = 0.9
+            let ia = peak * n
+
+            for (i = 0; i <= ia; i++) {
+                u[i] = i / ia * 0.5;
+            }
+            for (i = ia; i <= n; i++) {
+                u[i] = 0.5 - ((i - ia) / (n - ia)) * 0.5;
+            }
+            for (i = 0; i <= n; i++) {
+                v[i] = u[i]
+            }
+            for (i = 0; i <= n; i++) {
+                w[i] = 0.0
+            }
+            //
+            let graph = {}
+            //
+
+            for (j = 0; j <= 20000; j++) {
+                if ((j % 10) == 0) {
+                    console.log((j * k).toFixed(3))
+                    graph[(j * k).toFixed(1)] = []
+                    for (i = 0; i <= n; i += 2) {
+                        console.log((u[i]).toFixed(3))
+                        graph[(j * k).toFixed(1)].push([i, parseFloat(u[i].toFixed(4))])
+                    }
+                    console.log("\n")
+                }
+                for (i = 1; i < n; i++) {
+                    w[i] = q * (u[i + 1] + u[i - 1]) + s * u[i] - v[i]
+                }
+                for (i = 0; i <= n; i++) {
+                    v[i] = u[i]
+                    u[i] = w[i]
+                }
+            }
+            return graph
+        }
+
+        google.charts.load('current', { packages: ['corechart', 'line'] });
+        google.charts.setOnLoadCallback(drawBasic);
+
+        async function drawBasic() {
+
+            let rows = hyperbolic()
+            var current = 0;
+            var data = [];
+            let count = 0
+
+            for (let k in rows) {
+                data[count] = new google.visualization.DataTable();
+                data[count].addColumn('number', 'X');
+                data[count].addColumn('number', 'U');
+                data[count].addRows(rows[k])
+                count++
+            }
+
+            var options = {
+                width: 828,
+                height: 414,
+                animation: {
+                    duration: 100,
+                    easing: 'out',
+                },
+                hAxis: {
+                    title: 'x',
+                    minValue: 0.0,
+                    maxValue: 200,
+                },
+                vAxis: {
+                    title: 'U',
+                    minValue: -0.6,
+                    maxValue: 0.6,
+                    // ticks: [-0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
+                },
+            };
+
+            var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+
+            let countP = document.getElementById('count');
+
+            const backButton = document.getElementById('back');
+            const nextButton = document.getElementById('next');
+
+            function drawChart() {
+                chart.draw(data[current], options);
+            }
+
+            function back() {
+                if (current == 0) {
+                    current = 199
+                }
+                current = current - 1
+                countP.innerText = current
+                drawChart()
+            }
+
+            function update() {
+                if (current == 199) {
+                    current = -1
+                }
+                current = current + 1
+                countP.innerText = current
+                drawChart()
+            }
+
+            backButton.onclick = function () {
+                deleteInterval()
+                back()
+            }
+
+            nextButton.onclick = function () {
+                deleteInterval()
+                update()
+            }
+
+            let intervalId = setInterval(update, 100);
+
+            const startButton = document.getElementById('start');
+            const stopButton = document.getElementById('stop');
+
+            startButton.onclick = function () {
+                startInterval()
+            }
+            function startInterval() {
+                if (intervalId == null) {
+                    intervalId = setInterval(update, 200);
+                }
+            }
+
+            stopButton.onclick = function () {
+                deleteInterval()
+            }
+            function deleteInterval() {
+                if (intervalId != null) {
+                    clearInterval(intervalId)
+                    intervalId = null
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
